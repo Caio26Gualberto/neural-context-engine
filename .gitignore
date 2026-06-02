@@ -1,0 +1,93 @@
+# =========================
+# ENV FILES (CRÍTICO)
+# =========================
+.env
+.env.*
+*.env
+**/.env
+**/.env.*
+
+# =========================
+# NODE / REACT FRONTEND
+# =========================
+node_modules/
+dist/
+build/
+.vite/
+.cache/
+coverage/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# PYTHON BACKEND
+# =========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyc
+*.pyo
+*.pyd
+
+.Python
+env/
+venv/
+ENV/
+venv.bak/
+.venv/
+
+pip-log.txt
+pip-delete-this-directory.txt
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# =========================
+# JUPYTER / NOTEBOOKS
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# RAG / VECTOR DB / IA CACHE
+# =========================
+chroma_db/
+chroma/
+faiss_index/
+vector_store/
+storage/
+embeddings_cache/
+*.faiss
+*.index
+
+# =========================
+# MCP / TOOLS LOCAL STATE
+# =========================
+.mcp/
+.mcp-cache/
+.mcp-data/
+
+# =========================
+# SYSTEM / IDE
+# =========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# =========================
+# LOGS
+# =========================
+logs/
+*.log
+
+# =========================
+# DOCKER (se quiser ignorar builds locais)
+# =========================
+docker-compose.override.yml

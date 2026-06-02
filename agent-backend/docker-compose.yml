@@ -1,0 +1,22 @@
+version: "3.9"
+
+name: ai-agent-study
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg18
+    container_name: ai-agent-db
+
+    environment:
+      POSTGRES_DB: ai_agent
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+volumes:
+  postgres_data:

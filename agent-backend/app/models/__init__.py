@@ -1,0 +1,1 @@
+from app.models.knowledge_chunk import KnowledgeChunk
