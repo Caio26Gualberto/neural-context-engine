@@ -1,0 +1,53 @@
+INSERT INTO users (
+    id,
+    username,
+    balance,
+    created_at
+)
+VALUES
+(
+    '11111111-1111-1111-1111-111111111111',
+    'caio',
+    150.50,
+    NOW()
+),
+(
+    '22222222-2222-2222-2222-222222222222',
+    'john',
+    87.30,
+    NOW()
+);
+
+INSERT INTO payments (
+    id,
+    user_id,
+    amount,
+    status,
+    provider,
+    created_at
+)
+VALUES
+(
+    'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+    '11111111-1111-1111-1111-111111111111',
+    100,
+    'paid',
+    'stripe',
+    NOW()
+),
+(
+    'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+    '11111111-1111-1111-1111-111111111111',
+    50,
+    'pending',
+    'stripe',
+    NOW()
+),
+(
+    'cccccccc-cccc-cccc-cccc-cccccccccccc',
+    '22222222-2222-2222-2222-222222222222',
+    25,
+    'failed',
+    'stripe',
+    NOW()
+);
