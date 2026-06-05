@@ -31,5 +31,25 @@ TOOLS_SCHEMA = [
                 "required": ["payment_id"]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_knowledge",
+            "description": (
+                "Pesquisa documentos internos da empresa, "
+                "políticas, procedimentos, integrações, "
+                "chargebacks, pagamentos e conhecimento corporativo."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string"
+                    }
+                },
+                "required": ["query"]
+            }
+        }
     }
 ]

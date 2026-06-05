@@ -4,8 +4,7 @@ from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from app.db.database import SessionLocal
-from app.rag.search_service import SearchService
+from app.services.agent_service import AgentService
 from app.services.chat_service import ChatService
 
 router = APIRouter()
@@ -21,13 +20,7 @@ class AskResponse(BaseModel):
 
 @router.post("/ask", response_model=AskResponse)
 def ask(payload: AskRequest):
-    db = SessionLocal()
-    try:
-        results = SearchService.search(db=db, query=payload.question, limit=3)
-        context = "\n\n".join(row.content for row in results) if results else ""
-    finally:
-        db.close()
-
+    context = AgentService.gather_context(payload.question)
     return AskResponse(
         answer=ChatService.answer(question=payload.question, context=context)
     )
@@ -35,12 +28,7 @@ def ask(payload: AskRequest):
 
 @router.post("/ask/stream")
 def ask_stream(payload: AskRequest):
-    db = SessionLocal()
-    try:
-        results = SearchService.search(db=db, query=payload.question, limit=3)
-        context = "\n\n".join(row.content for row in results) if results else ""
-    finally:
-        db.close()
+    context = AgentService.gather_context(payload.question)
 
     def generate():
         for token in ChatService.stream_answer(question=payload.question, context=context):
