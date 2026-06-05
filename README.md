@@ -1,10 +1,12 @@
-# AI Agent
+# AI Agent — Banco Nexus
 
-A study project exploring AI engineering concepts: **RAG**, **MCP**, **LLM streaming**, **vector search**, and **document ingestion**.
+A study project simulating an internal AI agent for a fictional Brazilian bank (**Banco Nexus**), exploring: **Agentic RAG**, **tool calling**, **LLM streaming**, **vector search**, and **smart document ingestion**.
 
 ```
 AI-agent/
 ├── agent-backend/   # FastAPI + PostgreSQL + pgvector + OpenAI
+│   ├── app/         # Application code (agent, tools, RAG, models)
+│   └── knowledge/   # Markdown knowledge base (9 files, pt-BR)
 └── frontend/        # React chatbot (Nexus) with streaming UI
 ```
 
@@ -14,11 +16,12 @@ AI-agent/
 
 | Concept | Implementation |
 |---------|----------------|
-| **RAG** | Documents are embedded with OpenAI and stored in pgvector. On each query the top-k most similar chunks are retrieved and injected into the LLM prompt. |
-| **Vector search** | pgvector cosine similarity (`<=>`) over `vector(1536)` embeddings |
+| **Agentic RAG** | `AgentService` uses tool calling to decide when to search the knowledge base or query operational data, then `ChatService` produces the final natural language response |
+| **Tool calling** | OpenAI function calling with three tools: `search_knowledge`, `get_payment`, `get_user_balance` |
+| **Vector search** | pgvector cosine similarity (`<=>`) over `vector(1536)` embeddings from `text-embedding-3-small` |
+| **Smart ingestion** | SHA-256 file and chunk hashing — only re-embeds changed sections, inserts new ones, deletes removed ones |
 | **LLM streaming** | OpenAI `stream=True` piped through FastAPI `StreamingResponse` as SSE, consumed token-by-token in the React frontend |
-| **Document ingestion** | Scripts to embed and store arbitrary text documents into the knowledge base |
-| **MCP** | Placeholder for Model Context Protocol integration (in progress) |
+| **Knowledge hierarchy** | `KnowledgeDocument` → `KnowledgeChunk` with `document_id`, `chunk_index`, `content_hash` |
 
 ---
 
@@ -37,14 +40,15 @@ PostgreSQL 18 with pgvector runs on port **5433**.
 
 ```bash
 cd agent-backend
-cp .env.example .env        # fill in OPENAI_API_KEY
+cp .env.example .env          # fill in OPENAI_API_KEY
 pip install -r requirements.txt
-alembic upgrade head        # run migrations
-python -m app.seed_knowledge  # embed and store sample documents
+alembic upgrade head          # run all migrations
+python -m app.seed_db         # seed 30 users + 150 payments
+python -m app.seed_knowledge  # embed and store knowledge base
 python -m uvicorn app.main:app --reload
 ```
 
-Backend available at `http://localhost:8000`
+Backend available at `http://localhost:8000` · Swagger at `/docs`
 
 ### 3. Start the frontend
 
@@ -58,12 +62,37 @@ Frontend (Nexus chatbot) available at `http://localhost:5173`
 
 ---
 
+## Knowledge base (`knowledge/`)
+
+Nine markdown files in Portuguese covering Banco Nexus internal policies. Each `##` section becomes one embedded chunk.
+
+| File | Topics |
+|------|--------|
+| `pagamentos.md` | Payment methods, statuses, processing times, errors |
+| `pix.md` | PIX keys, limits, scheduled PIX, QR Code, errors |
+| `reembolso.md` | Refund eligibility, process, SLA |
+| `chargeback.md` | Chargeback process, motives, timelines, vs. refund |
+| `telegram.md` | Bot commands, alerts, security |
+| `usuarios.md` | Account creation, KYC tiers, blocking, closure |
+| `cartao.md` | Card types, credit limits, CVV, billing, rewards |
+| `fraude.md` | Fraud detection, alerts, common scams |
+| `limites.md` | Transaction limits by tier (PIX, TED, card, boleto) |
+
+To re-ingest after editing any `.md` file — only changed sections are re-embedded:
+
+```bash
+python -m app.seed_knowledge
+```
+
+---
+
 ## Useful scripts (run from `agent-backend/`)
 
 | Command | Description |
 |---------|-------------|
-| `python -m app.seed_knowledge` | Embed and insert sample documents into the knowledge base |
-| `python -m app.ingest` | Ingest a single custom document |
+| `python -m app.seed_db` | Insert 30 users and 150 payments with realistic data |
+| `python -m app.seed_knowledge` | Smart-ingest all `knowledge/*.md` files |
+| `python -m app.ingest` | Same as `seed_knowledge` (alias) |
 | `python -m app.test_search` | Run a semantic search query and print results |
 | `python -m app.test_connection` | Verify database connectivity |
 | `alembic upgrade head` | Apply all pending migrations |
@@ -75,11 +104,11 @@ Frontend (Nexus chatbot) available at `http://localhost:5173`
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/ask` | Returns a complete answer (waits for full response) |
-| `POST` | `/ask/stream` | Streams the answer token by token via SSE |
+| `POST` | `/ask` | Agent gathers context via tools, returns complete answer |
+| `POST` | `/ask/stream` | Agent gathers context, streams answer token by token (SSE) |
 
 ```json
-{ "question": "How does Stripe Checkout work?" }
+{ "question": "Quais são os limites de PIX para conta Premium?" }
 ```
 
 See `agent-backend/README.md` for the full backend setup guide.
