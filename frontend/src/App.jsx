@@ -165,10 +165,15 @@ export default function App() {
     }
   }, [input, isStreaming, streamMode])
 
-  const handleClear = () => {
+  const handleClear = async () => {
     if (isStreaming) abortRef.current?.abort()
-    setMessages([INITIAL_MESSAGE])
     setIsStreaming(false)
+    try {
+      await fetch(`${BACKEND_URL}/conversation`, { method: 'DELETE' })
+    } catch {
+      // se o backend não responder, limpa o front mesmo assim
+    }
+    setMessages([INITIAL_MESSAGE])
     setTimeout(() => inputRef.current?.focus(), 50)
   }
 
